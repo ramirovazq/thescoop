@@ -28,7 +28,17 @@ const routes = {
   },
   '/articles/:id/downvote': {
     'PUT': downvoteArticle
-  }
+  },
+  '/comments': {
+    'POST': createComment
+  },
+  '/comments/:id': {
+  },
+  '/comments/:id/upvote': {
+  },
+  '/comments/:id/downvote': {
+  },
+
 };
 
 function getUser(url, request) {
@@ -141,6 +151,40 @@ function createArticle(url, request) {
 
   return response;
 }
+
+function createComment(url, request) {
+
+  const requestComment = request.body && request.body.comment;
+  const response = {};
+
+//  console.log("//////////////////");
+  //console.log(requestComment);
+
+
+  if (requestComment && requestComment.username && requestComment.body && 
+      requestComment.articleId && database.users[requestComment.username] && database.articles[requestComment.articleId]){
+    const comment = {
+        id: database.nextCommentId++,
+        body: requestComment.body,
+        username: requestComment.username,
+        articleId: requestComment.articleId,
+        upvotedBy: [],
+        downvotedBy: []
+    };
+
+    database.comments[comment.id] = comment;
+    database.users[comment.username].commentIds.push(comment.id);
+    database.articles[requestComment.articleId].commentIds.push(comment.id);
+
+    response.body = {comment: comment};
+    response.status = 201;
+  } else {
+    response.status = 400;
+  }
+
+  return response;
+}
+
 
 function updateArticle(url, request) {
   const id = Number(url.split('/').filter(segment => segment)[1]);
