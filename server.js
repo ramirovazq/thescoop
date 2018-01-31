@@ -33,7 +33,8 @@ const routes = {
     'POST': createComment
   },
   '/comments/:id': {
-    'PUT': updateComment
+    'PUT': updateComment,
+    'DELETE': deleteComment
   },
   '/comments/:id/upvote': {
   },
@@ -197,11 +198,37 @@ function updateComment(url, request) {
     if (requestComment.body){
         database.comments[id].body = requestComment.body;//requestComment.body;
     }
-    response.body = {comment: savedComment};
+    response.body = {comment: requestComment};
     response.status = 200;
   }
   return response;
 }
+
+function deleteComment(url, request) {
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const savedComment = database.comments[id];
+  const response = {};
+
+  if (savedComment) {
+    
+    database.comments[id] = null;
+    const lista_comments_filtrada = database.users[savedComment.username].commentIds.filter((commentId) => {
+        return (commentId !== savedComment.id);
+    }) 
+    database.users[savedComment.username].commentIds = lista_comments_filtrada
+    const lista_comments_articles_filtrada = database.articles[savedComment.articleId].commentIds.filter((commentId) => {
+        return (commentId !== savedComment.id);
+    }) 
+    database.articles[savedComment.articleId].commentIds = lista_comments_articles_filtrada
+
+    response.status = 204;
+  } else {
+    response.status = 404;
+  }
+
+  return response;
+}
+
 
 
 function updateArticle(url, request) {
