@@ -37,8 +37,10 @@ const routes = {
     'DELETE': deleteComment
   },
   '/comments/:id/upvote': {
+    'PUT': upvoteComment
   },
   '/comments/:id/downvote': {
+    'PUT': downvoteComment
   },
 
 };
@@ -330,6 +332,46 @@ function downvote(item, username) {
   }
   return item;
 }
+
+function upvoteComment(url, request) {
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const username = request.body && request.body.username;
+  // let savedArticle = database.articles[id];
+  let savedComment = database.comments[id];
+
+  const response = {};
+
+  if (savedComment && database.users[username]) {
+    savedComment = upvote(savedComment, username);
+
+    response.body = {comment: savedComment};
+    response.status = 200;
+  } else {
+    response.status = 400;
+  }
+
+  return response;
+}
+
+function downvoteComment(url, request) {
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const username = request.body && request.body.username;
+  let savedComment = database.comments[id];
+
+  const response = {};
+
+  if (savedComment && database.users[username]) {
+    savedComment = downvote(savedComment, username);
+
+    response.body = {comment: savedComment};
+    response.status = 200;
+  } else {
+    response.status = 400;
+  }
+
+  return response;
+}
+
 
 // Write all code above this line.
 
